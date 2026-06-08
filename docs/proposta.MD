@@ -8,7 +8,7 @@ A proposta deve apresentar uma ideia simples, clara e viável para ser desenvolv
 
 Escreva aqui o nome provisório do jogo.
 
-Exemplo:
+Exemplo: All Stars Tower Defenser
 
 > Corrida dos Obstáculos
 
@@ -16,8 +16,8 @@ Exemplo:
 
 Liste os integrantes do grupo.
 
-- Nome 1:
-- Nome 2:
+- Nome 1:Jorge Lucas Vieira 
+- Nome 2:Lucas Otavio Costa Mafia 
 - Nome 3:
 - Nome 4:
 
@@ -40,24 +40,23 @@ Exemplos:
 - jogo de clique rápido;
 - jogo de sobrevivência simples.
 
-Tipo escolhido pelo grupo:
+Tipo escolhido pelo grupo: 
 
-> Escreva aqui.
+> Tower Defenser.
 
 ## 4. Descrição geral do jogo
 
 Explique, em poucas linhas, como o jogo funcionará.
 
-Procure responder:
+
 
 - O que aparece na tela?
 - O que o jogador controla?
 - O que o jogador precisa fazer?
 - Quais desafios aparecem durante a partida?
 
-Descrição:
-
-> Escreva aqui.
+Descrição: 
+> Procure responder: aparece na tela um caminho onde inimigos irao passar e o jogador devera proteger sua torre de todos os ataques , o jogador podera colocar diferentes soldados para proteger a torre. 
 
 ## 5. Objetivo do jogador
 
@@ -75,7 +74,7 @@ Exemplos:
 
 Objetivo:
 
-> Escreva aqui.
+> proteger a torre de todos os ataques.
 
 ## 6. Regras principais
 
@@ -91,9 +90,9 @@ Exemplo:
 
 Regras do grupo:
 
-- Regra 1:
-- Regra 2:
-- Regra 3:
+- Regra 1:jogador so tem uma vida 
+- Regra 2:ele ganha dinheiro por inimigo derrotado
+- Regra 3:inimigos vem em ordas ate a torre
 - Regra 4:
 - Regra 5:
 
@@ -111,7 +110,7 @@ Exemplos:
 
 Condição de vitória:
 
-> Escreva aqui.
+> O jogador ganha se conseguir proteger a torre ate o fim das rodadas.
 
 ## 8. Condição de derrota ou encerramento
 
@@ -127,7 +126,7 @@ Exemplos:
 
 Condição de derrota ou encerramento:
 
-> Escreva aqui.
+> Se sua torre cair.
 
 ## 9. Elementos previstos no jogo
 
@@ -137,7 +136,7 @@ Descreva os principais elementos que farão parte do jogo.
 
 Exemplo:
 
-> Um personagem controlado pelas setas do teclado.
+> com O mouse o jogador deve escolher seus soldados de forma estrategica.
 
 Descrição:
 
@@ -157,7 +156,7 @@ Descrição:
 
 Exemplo:
 
-> Moedas aparecem na tela e aumentam a pontuação quando coletadas.
+> ganha moedas por inimigos derrotados.
 
 Descrição:
 
@@ -167,7 +166,7 @@ Descrição:
 
 Exemplo:
 
-> O jogador começa com 3 vidas e ganha 10 pontos por item coletado.
+> inimigo começa com 100 de ouro e consegue 50 por inimigo derrotado .
 
 Descrição:
 
@@ -222,7 +221,7 @@ Exemplo:
 
 Recursos previstos:
 
-> Escreva aqui.
+> ainda nao previsto.
 
 Caso não pretenda utilizar recursos externos, escreva:
 
@@ -261,7 +260,7 @@ Exemplo:
 
 Escopo mínimo:
 
-> Escreva aqui.
+> um inimigo andara pelo caminho e devera ser derrotado dinheor e ganho a cada rodada.
 
 ## 15. Possíveis melhorias, caso haja tempo
 
@@ -281,6 +280,6 @@ Exemplos:
 
 Melhorias possíveis:
 
-- Melhoria 1:
-- Melhoria 2:
-- Melhoria 3:
+- Melhoria 1: implementar updates para cada soldado aliado 
+- Melhoria 2: adicionar vida aos inimigos 
+- Melhoria 3: adicionar vida a torre 

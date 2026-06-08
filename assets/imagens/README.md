@@ -4,7 +4,7 @@ Pasta destinada a sprites, fundos, icones e outros elementos visuais.
 
 ## Conteudo atual
 
-- `spritesheet.bmp`: spritesheet base do template.
+- `spritesheet.bmp`: ![alt text](<Captura de Tela 2026-06-08 às 19.26.21.png>)
 
 ## Recomendações
 
