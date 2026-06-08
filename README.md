@@ -1,4 +1,4 @@
-# Nome do Jogo
+# All Stars Tower Defenser
 
 Projeto final da disciplina de Introdução a Algoritmos/Programação, desenvolvido com Python e Pygame.
 
