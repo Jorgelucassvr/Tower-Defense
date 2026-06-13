@@ -80,7 +80,6 @@ class Inimigo:
     def desenhar(self, tela):
         # Desenha o inimigo como uma bolinha verde; o supremo e maior e mais escuro.
         pygame.draw.circle(tela, self.cor, (int(self.x), int(self.y)), self.raio)
-        #chef
         pygame.draw.circle(tela, VERDE_ESCURO, (int(self.x), int(self.y)), self.raio, 2)
         self.desenhar_barra_vida(tela)
 
@@ -98,7 +97,7 @@ class Inimigo:
 
 
 class Personagem:
-    # tipo de unidade colocada 
+    # Representa uma unidade colocada pelo jogador: guerreiro ou arqueiro.
     def __init__(self, tipo, posicao):
         self.tipo = tipo
         self.x, self.y = posicao
@@ -106,7 +105,7 @@ class Personagem:
         self.cooldown = 0
 
     def atualizar(self, inimigos, dt):
-        # cooldown
+        # Controla o intervalo entre ataques da unidade.
         if self.cooldown > 0:
             self.cooldown -= dt
 
@@ -116,7 +115,7 @@ class Personagem:
             self.cooldown = self.dados["tempo_ataque"]
 
     def encontrar_alvo(self, inimigos):
-        # Range de ataque 
+        # O arqueiro ataca em circulo; o guerreiro ataca apenas a frente.
         for inimigo in inimigos:
             if not inimigo.ativo:
                 continue
@@ -130,8 +129,7 @@ class Personagem:
                 return inimigo
 
         return None
-    
-    #s
+
     def desenhar(self, tela, fonte):
         # Desenho visual do personagem e o seu alcance.
         cor = LARANJA if self.tipo == "guerreiro" else ROXO

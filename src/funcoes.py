@@ -131,9 +131,23 @@ def desenhar_ranking(tela, fonte, ranking):
         tela.blit(fonte.render("Sem pontuacoes", True, PRETO), (x, y + 35))
         return
 
-    for indice, pontuacao in enumerate(ranking[:5], start=1):
-        texto = fonte.render(f"{indice}. {pontuacao} pontos", True, PRETO)
+    for indice, entrada in enumerate(ranking[:5], start=1):
+        resultado = abreviar_resultado(entrada["resultado"])
+        texto = fonte.render(
+            f"{indice}. {entrada['pontos']} pts {resultado} O{entrada['ondas']}",
+            True,
+            PRETO,
+        )
         tela.blit(texto, (x, y + 30 + indice * 28))
+
+
+def abreviar_resultado(resultado):
+    # Usa letras curtas para caber no painel do ranking.
+    if resultado == "vitoria":
+        return "V"
+    if resultado == "derrota":
+        return "D"
+    return "-"
 
 
 def desenhar_fim_de_jogo(tela, fonte_grande, estado):

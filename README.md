@@ -54,6 +54,7 @@ O objetivo é sobreviver às 5 ondas e derrotar ou segurar o inimigo supremo man
 - O jogador vence quando todas as ondas acabam e ainda existe pelo menos 1 vida.
 - O jogador perde quando as vidas chegam a 0.
 - A pontuação final entra no ranking salvo em arquivo.
+- O ranking mostra pontos, resultado (`V` para vitoria e `D` para derrota) e onda alcancada.
 - No fim da partida, a janela continua aberta e o jogador escolhe entre reiniciar ou sair.
 
 ## Controles
@@ -93,7 +94,7 @@ python -m pytest
   Para mudar o preco do guerreiro ou arqueiro, edite `TIPOS_PERSONAGENS`. Para mudar o limite de unidades, edite `LIMITE_GUERREIROS` e `LIMITE_ARQUEIROS`. Para mudar ondas, vida ou pontuacao, edite `TOTAL_ONDAS`, `INIMIGOS_POR_ONDA`, `VIDA_SLIME_BASE`, `VIDA_EXTRA_POR_ONDA`, `PONTOS_POR_SLIME` e `PONTOS_INIMIGO_SUPREMO`. Para mudar o caminho dos slimes, edite `CAMINHO_ESTRADA` e `WAYPOINTS`.
 
 - Recorde e ranking salvos em arquivo: `src/dados.py`, `data/recorde.txt` e `data/ranking.txt`
-  Para trocar o tipo de dado salvo, ajuste `salvar_recorde`, `carregar_recorde`, `salvar_pontuacao_ranking`, `carregar_ranking` e o valor enviado em `src/jogo.py`.
+  O ranking usa o formato `pontos;resultado;ondas`. Para trocar o tipo de dado salvo, ajuste `salvar_recorde`, `carregar_recorde`, `salvar_pontuacao_ranking`, `carregar_ranking` e o valor enviado em `src/jogo.py`.
 
 - Testes de logica: `tests/test_logica.py`
   Para adicionar testes novos, crie funcoes iniciando com `test_`.

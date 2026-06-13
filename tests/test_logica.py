@@ -1,7 +1,7 @@
 import os
 import tempfile
 
-from src.dados import carregar_ranking, salvar_pontuacao_ranking
+from src.dados import carregar_ranking, converter_linha_ranking, salvar_pontuacao_ranking
 from src.config import CAMINHO_ESTRADA, WAYPOINTS
 from src.funcoes import calcular_pontos, jogador_perdeu, limitar_valor, posicao_no_caminho
 from src.jogo import contar_personagens, criar_inimigo_supremo, limite_do_personagem, vida_slime_da_onda
@@ -102,13 +102,24 @@ def test_ranking_salva_melhores_pontuacoes():
     arquivo.close()
 
     try:
-        salvar_pontuacao_ranking(arquivo.name, 100)
-        salvar_pontuacao_ranking(arquivo.name, 300)
-        salvar_pontuacao_ranking(arquivo.name, 200)
+        salvar_pontuacao_ranking(arquivo.name, 100, "derrota", 2)
+        salvar_pontuacao_ranking(arquivo.name, 300, "vitoria", 5)
+        salvar_pontuacao_ranking(arquivo.name, 200, "derrota", 4)
 
-        assert carregar_ranking(arquivo.name) == [300, 200, 100]
+        ranking = carregar_ranking(arquivo.name)
+        assert [entrada["pontos"] for entrada in ranking] == [300, 200, 100]
+        assert ranking[0]["resultado"] == "vitoria"
+        assert ranking[0]["ondas"] == 5
     finally:
         os.remove(arquivo.name)
+
+
+def test_ranking_antigo_com_apenas_numero_continua_valido():
+    """Deve carregar arquivos antigos que tinham somente a pontuacao."""
+    entrada = converter_linha_ranking("250\n")
+
+    assert entrada["pontos"] == 250
+    assert entrada["resultado"] == "Partida"
 
 
 def test_limite_de_personagens():

@@ -247,7 +247,12 @@ def verificar_fim_de_jogo(estado, inimigos):
         if estado["pontos"] > estado["recorde"]:
             estado["recorde"] = estado["pontos"]
             salvar_recorde(CAMINHO_RECORDE, estado["recorde"])
-        estado["ranking"] = salvar_pontuacao_ranking(CAMINHO_RANKING, estado["pontos"])
+        estado["ranking"] = salvar_pontuacao_ranking(
+            CAMINHO_RANKING,
+            estado["pontos"],
+            estado["status"],
+            estado["onda_atual"],
+        )
         estado["recorde_salvo"] = True
 
 
