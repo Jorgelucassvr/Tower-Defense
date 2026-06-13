@@ -1,5 +1,10 @@
+import os
+import tempfile
+
+from src.dados import carregar_ranking, salvar_pontuacao_ranking
 from src.config import CAMINHO_ESTRADA, WAYPOINTS
 from src.funcoes import calcular_pontos, jogador_perdeu, limitar_valor, posicao_no_caminho
+from src.jogo import contar_personagens, criar_inimigo_supremo, limite_do_personagem, vida_slime_da_onda
 from src.movimentaçao import Inimigo, Personagem
 
 
@@ -73,3 +78,52 @@ def test_arqueiro_ataca_em_area():
     inimigo.y = 100
 
     assert arqueiro.encontrar_alvo([inimigo]) == inimigo
+
+
+def test_vida_aumenta_com_a_onda():
+    """Deve aumentar a vida dos slimes conforme a onda avanca."""
+    assert vida_slime_da_onda(2) > vida_slime_da_onda(1)
+    assert vida_slime_da_onda(5) > vida_slime_da_onda(2)
+
+
+def test_inimigo_supremo_e_mais_forte():
+    """Deve criar o supremo com mais vida e tamanho que o slime comum."""
+    slime = Inimigo(WAYPOINTS)
+    supremo = criar_inimigo_supremo()
+
+    assert supremo.tipo == "supremo"
+    assert supremo.vida_maxima > slime.vida_maxima
+    assert supremo.raio > slime.raio
+
+
+def test_ranking_salva_melhores_pontuacoes():
+    """Deve salvar o ranking em ordem decrescente e respeitar o limite."""
+    arquivo = tempfile.NamedTemporaryFile(delete=False)
+    arquivo.close()
+
+    try:
+        salvar_pontuacao_ranking(arquivo.name, 100)
+        salvar_pontuacao_ranking(arquivo.name, 300)
+        salvar_pontuacao_ranking(arquivo.name, 200)
+
+        assert carregar_ranking(arquivo.name) == [300, 200, 100]
+    finally:
+        os.remove(arquivo.name)
+
+
+def test_limite_de_personagens():
+    """Deve limitar o jogo a 3 guerreiros e 2 arqueiros."""
+    assert limite_do_personagem("guerreiro") == 3
+    assert limite_do_personagem("arqueiro") == 2
+
+
+def test_contar_personagens_por_tipo():
+    """Deve contar separadamente guerreiros e arqueiros colocados."""
+    personagens = [
+        Personagem("guerreiro", (10, 10)),
+        Personagem("guerreiro", (20, 20)),
+        Personagem("arqueiro", (30, 30)),
+    ]
+
+    assert contar_personagens(personagens, "guerreiro") == 2
+    assert contar_personagens(personagens, "arqueiro") == 1

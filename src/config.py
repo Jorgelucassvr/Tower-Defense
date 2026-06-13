@@ -14,6 +14,7 @@ PRETO = (0, 0, 0)
 CINZA = (212, 212, 212)
 VERDE = (74, 140, 86)
 VERDE_SLIME = (57, 190, 88)
+VERDE_SUPREMO = (22, 120, 54)
 MARROM = (163, 120, 72)
 AZUL = (70, 130, 255)
 VERMELHO = (220, 70, 70)
@@ -23,6 +24,7 @@ LARANJA = (226, 131, 59)
 VERDE_ESCURO = (30, 110, 50)
 
 CAMINHO_RECORDE = "data/recorde.txt"
+CAMINHO_RANKING = "data/ranking.txt"
 CAMINHO_SPRITES = "assets/imagens/spritesheet.bmp"
 
 # Cada retangulo representa um pedaço visivel da estrada.
@@ -52,8 +54,17 @@ WAYPOINTS = [
 MOEDAS_INICIAIS = 150
 VIDAS_INICIAIS = 3
 MOEDAS_POR_ELIMINACAO = 10
-TOTAL_INIMIGOS_ONDA = 5
+PONTOS_POR_SLIME = 100
+PONTOS_INIMIGO_SUPREMO = 500
+TOTAL_ONDAS = 5
+INIMIGOS_POR_ONDA = 5
 INTERVALO_SPAWN = 1.0
+INTERVALO_ENTRE_ONDAS = 2.0
+VIDA_SLIME_BASE = 45
+VIDA_EXTRA_POR_ONDA = 18
+VIDA_INIMIGO_SUPREMO = 220
+LIMITE_GUERREIROS = 3
+LIMITE_ARQUEIROS = 2
 
 # Dados dos dois personagens que o jogador pode colocar no mapa.
 TIPOS_PERSONAGENS = {
@@ -73,8 +84,15 @@ TIPOS_PERSONAGENS = {
     },
 }
 
-# Botoes de selecao dos personagens.
+# Area da loja, onde ficam os icones dos personagens.
+PAINEL_PERSONAGENS = pygame.Rect(900, 15, 285, 155)
+
+# Botoes de selecao dos personagens dentro da loja.
 BOTOES_PERSONAGENS = {
-    "guerreiro": pygame.Rect(910, 25, 125, 50),
-    "arqueiro": pygame.Rect(1050, 25, 125, 50),
+    "guerreiro": pygame.Rect(920, 85, 115, 60),
+    "arqueiro": pygame.Rect(1050, 85, 115, 60),
 }
+
+# Botoes mostrados quando a partida acaba.
+BOTAO_REINICIAR = pygame.Rect(430, 185, 160, 50)
+BOTAO_SAIR = pygame.Rect(610, 185, 160, 50)

@@ -4,23 +4,39 @@ import pygame
 
 from src.config import (
     LARANJA,
+    MOEDAS_POR_ELIMINACAO,
+    PONTOS_INIMIGO_SUPREMO,
+    PONTOS_POR_SLIME,
     PRETO,
     ROXO,
     TIPOS_PERSONAGENS,
     VERDE_ESCURO,
     VERDE_SLIME,
+    VERDE_SUPREMO,
     VERMELHO,
 )
 
 
 class Inimigo:
     # Esta classe controla o slime: posicao, vida e movimento pelo caminho.
-    def __init__(self, waypoints, atraso=0, velocidade=85, raio=15, vida=45):
+    def __init__(
+        self,
+        waypoints,
+        atraso=0,
+        velocidade=85,
+        raio=15,
+        vida=45,
+        tipo="slime",
+    ):
         self.waypoints = waypoints
         self.velocidade = velocidade
         self.raio = raio
         self.vida_maxima = vida
         self.vida = vida
+        self.tipo = tipo
+        self.cor = VERDE_SUPREMO if tipo == "supremo" else VERDE_SLIME
+        self.moedas = MOEDAS_POR_ELIMINACAO
+        self.pontos = PONTOS_INIMIGO_SUPREMO if tipo == "supremo" else PONTOS_POR_SLIME
         self.x = float(waypoints[0][0] - atraso)
         self.y = float(waypoints[0][1])
         self.indice_alvo = 1
@@ -62,14 +78,15 @@ class Inimigo:
         self.y += direcao_y * passo
 
     def desenhar(self, tela):
-        # Desenha o slime como uma bolinha verde.
-        pygame.draw.circle(tela, VERDE_SLIME, (int(self.x), int(self.y)), self.raio)
+        # Desenha o inimigo como uma bolinha verde; o supremo e maior e mais escuro.
+        pygame.draw.circle(tela, self.cor, (int(self.x), int(self.y)), self.raio)
+        #chef
         pygame.draw.circle(tela, VERDE_ESCURO, (int(self.x), int(self.y)), self.raio, 2)
         self.desenhar_barra_vida(tela)
 
     def desenhar_barra_vida(self, tela):
         # Mostra a vida do slime acima da cabeca.
-        largura = 36
+        largura = 54 if self.tipo == "supremo" else 36
         altura = 6
         x_barra = int(self.x - largura / 2)
         y_barra = int(self.y - self.raio - 12)
@@ -81,7 +98,7 @@ class Inimigo:
 
 
 class Personagem:
-    # Representa uma unidade colocada pelo jogador: guerreiro ou arqueiro.
+    # tipo de unidade colocada 
     def __init__(self, tipo, posicao):
         self.tipo = tipo
         self.x, self.y = posicao
@@ -89,7 +106,7 @@ class Personagem:
         self.cooldown = 0
 
     def atualizar(self, inimigos, dt):
-        # Reduz o tempo de espera entre ataques e tenta atacar um alvo.
+        # cooldown
         if self.cooldown > 0:
             self.cooldown -= dt
 
@@ -99,7 +116,7 @@ class Personagem:
             self.cooldown = self.dados["tempo_ataque"]
 
     def encontrar_alvo(self, inimigos):
-        # O guerreiro ataca apenas inimigos na sua frente; o arqueiro ataca em area circular.
+        # Range de ataque 
         for inimigo in inimigos:
             if not inimigo.ativo:
                 continue
@@ -113,9 +130,10 @@ class Personagem:
                 return inimigo
 
         return None
-
+    
+    #s
     def desenhar(self, tela, fonte):
-        # Desenha visualmente o personagem e o seu alcance.
+        # Desenho visual do personagem e o seu alcance.
         cor = LARANJA if self.tipo == "guerreiro" else ROXO
         pygame.draw.circle(tela, cor, (int(self.x), int(self.y)), 18)
         pygame.draw.circle(tela, PRETO, (int(self.x), int(self.y)), 18, 2)

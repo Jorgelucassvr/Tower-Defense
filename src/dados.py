@@ -17,3 +17,33 @@ def carregar_recorde(caminho_arquivo):
 
     except FileNotFoundError:
         return 0
+
+
+def carregar_ranking(caminho_arquivo):
+    # Le o ranking do arquivo e devolve uma lista com as maiores pontuacoes.
+    try:
+        with open(caminho_arquivo, "r", encoding="utf-8") as arquivo:
+            linhas = arquivo.readlines()
+    except FileNotFoundError:
+        return []
+
+    ranking = []
+    for linha in linhas:
+        linha = linha.strip()
+        if linha.isdigit():
+            ranking.append(int(linha))
+
+    return sorted(ranking, reverse=True)
+
+
+def salvar_pontuacao_ranking(caminho_arquivo, pontuacao, limite=5):
+    # Adiciona a nova pontuacao e salva apenas as melhores posicoes.
+    ranking = carregar_ranking(caminho_arquivo)
+    ranking.append(pontuacao)
+    ranking = sorted(ranking, reverse=True)[:limite]
+
+    with open(caminho_arquivo, "w", encoding="utf-8") as arquivo:
+        for valor in ranking:
+            arquivo.write(f"{valor}\n")
+
+    return ranking
