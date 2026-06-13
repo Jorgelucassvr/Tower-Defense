@@ -22,60 +22,42 @@ Este repositório é um template para os grupos da disciplina. A proposta é com
 
 ## Descrição do jogo
 
-Descreva brevemente a ideia principal do jogo.
+All Stars Tower Defenser é um protótipo de Tower Defense feito em Pygame. O jogador posiciona personagens pelo mapa para impedir que uma onda de slimes atravesse a estrada e chegue ao final do percurso.
 
-Exemplo: No jogo, os inimigos aparecem em ondas e seguem um caminho até a base do jogador. O objetivo é impedir que eles cheguem ao final do percurso. Para isso, o jogador posiciona torres pelo cenário. Cada torre ataca automaticamente os inimigos que passam perto dela.
-Conforme o jogador derrota os inimigos, ele ganha moedas. Essas moedas podem ser usadas para comprar novas torres ou melhorar as torres já existentes. A cada nova onda, os inimigos ficam mais fortes ou aparecem em maior quantidade
+Nesta versão básica existem dois personagens:
 
-> O jogo consiste em controlar um personagem que deve coletar moedas e evitar obstáculos. O jogador ganha pontos ao coletar itens e perde vidas ao colidir com obstáculos. A partida termina quando o tempo acaba ou quando o jogador perde todas as vidas.
+- Guerreiro: custa 50 moedas e ataca apenas inimigos que passam na sua frente.
+- Arqueiro: custa 100 moedas e ataca inimigos dentro de uma área circular maior.
+
+Cada slime eliminado gera 10 moedas para o jogador. O jogo salva o recorde de eliminações no arquivo `data/recorde.txt`.
 
 ## Objetivo do jogador
 
-Explique o que o jogador precisa fazer para vencer ou avançar no jogo.
-
-Exemplo: O objetivo do jogo é sobreviver ao maior número possível de ondas, protegendo a base e usando bem as moedas para posicionar e melhorar as torres.
-
-> O objetivo é coletar a maior quantidade possível de itens antes que o tempo acabe, evitando colisões com os obstáculos.
+O objetivo é sobreviver à onda de 5 slimes. O jogador vence se eliminar ou segurar todos os slimes mantendo pelo menos uma vida. O jogador perde se os slimes chegarem ao final do caminho e as vidas acabarem.
 
 ## Regras do jogo
 
-Liste as principais regras do jogo.
-
-Exemplo: Regras do jogo
-O jogador começa com uma quantidade inicial de moedas.
-As torres só podem ser colocadas em locais permitidos no mapa.
-Os inimigos seguem um caminho fixo até a base.
-Cada inimigo que chega à base faz o jogador perder vida.
-O jogador perde se a vida da base chegar a zero.
-O jogador ganha moedas ao derrotar inimigos.
-As moedas podem ser usadas para comprar ou melhorar torres.
-O jogo fica mais difícil a cada onda de inimigos
-
-- O jogador se movimenta usando as setas do teclado.
-- Cada item coletado aumenta a pontuação.
-- Colidir com um obstáculo reduz a quantidade de vidas.
-- A partida termina quando o jogador perde todas as vidas ou quando o tempo acaba.
+- O jogador começa com 150 moedas e 3 vidas.
+- O guerreiro custa 50 moedas.
+- O arqueiro custa 100 moedas.
+- Os personagens podem ser colocados em qualquer parte do mapa, menos na estrada.
+- A onda possui 5 slimes verdes.
+- Cada slime possui barra de vida acima da cabeça.
+- Cada eliminação rende 10 moedas.
+- Cada slime que chega ao final tira 1 vida.
+- O jogador vence quando a onda acaba e ainda existe pelo menos 1 vida.
+- O jogador perde quando as vidas chegam a 0.
 
 ## Controles
 
-Informe as teclas ou comandos utilizados no jogo.
-
-Exemplo: Os controles do jogo são simples:
-Mouse: usado para selecionar torres e posicioná-las no mapa.
-Clique esquerdo: escolhe uma torre ou confirma o local onde ela será colocada.
-Clique em uma torre: abre as opções de melhoria ou venda.
-Botão “Iniciar onda”: começa a próxima onda de inimigos.
-Tecla ESC: cancela a seleção de uma torre.
-Tecla P: pausa o jogo.
-Tecla R: reinicia a partida.
+- Mouse: usado para selecionar personagens e posicioná-los no mapa.
+- Clique em "Guerreiro": seleciona o guerreiro.
+- Clique em "Arqueiro": seleciona o arqueiro.
+- Clique fora da estrada: coloca o personagem selecionado, se houver moedas suficientes.
 
 ## Como executar o projeto
 
-### 1. Clonar o repositório
-
 ```bash
-git clone LINK_DO_REPOSITORIO
-cd NOME_DA_PASTA
 pip install -r requirements.txt
 python main.py
 ```
@@ -85,6 +67,26 @@ python main.py
 ```bash
 python -m pytest
 ```
+
+## Funcionalidades principais no codigo
+
+- Janela, loop principal e estados do jogo: `src/jogo.py`
+  Para alterar a regra geral da partida, edite as funcoes `atualizar_estado`, `verificar_fim_de_jogo` e `executar_jogo`.
+
+- Guerreiro, arqueiro e slimes: `src/movimentaçao.py`
+  Para mudar dano, alcance, velocidade ou vida, prefira alterar os valores em `src/config.py`.
+
+- Mapa, estrada e interface: `src/funcoes.py`
+  Para mudar o desenho do mapa ou os textos da tela, edite `desenhar_mapa`, `desenhar_interface` e `desenhar_fim_de_jogo`.
+
+- Custos, moedas, vidas, cores e caminho dos inimigos: `src/config.py`
+  Para mudar o preco do guerreiro ou arqueiro, edite `TIPOS_PERSONAGENS`. Para mudar o caminho dos slimes, edite `CAMINHO_ESTRADA` e `WAYPOINTS`.
+
+- Recorde salvo em arquivo: `src/dados.py` e `data/recorde.txt`
+  Para trocar o tipo de dado salvo, ajuste `salvar_recorde`, `carregar_recorde` e o valor enviado em `src/jogo.py`.
+
+- Testes de logica: `tests/test_logica.py`
+  Para adicionar testes novos, crie funcoes iniciando com `test_`.
 
 ## Checklist mínimo para entrega
 

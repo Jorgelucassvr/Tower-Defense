@@ -2,27 +2,42 @@ import math
 
 import pygame
 
-from src.config import CINZA
+from src.config import (
+    LARANJA,
+    PRETO,
+    ROXO,
+    TIPOS_PERSONAGENS,
+    VERDE_ESCURO,
+    VERDE_SLIME,
+    VERMELHO,
+)
 
 
 class Inimigo:
-    # Esta classe controla a posicao e a movimentacao do inimigo.
-    def __init__(self, waypoints, velocidade=140, raio=14):
+    # Esta classe controla o slime: posicao, vida e movimento pelo caminho.
+    def __init__(self, waypoints, atraso=0, velocidade=85, raio=15, vida=45):
         self.waypoints = waypoints
         self.velocidade = velocidade
         self.raio = raio
-        self.resetar()
-
-    def resetar(self):
-        # Coloca o inimigo novamente no primeiro ponto do caminho.
-        self.x = float(self.waypoints[0][0])
-        self.y = float(self.waypoints[0][1])
+        self.vida_maxima = vida
+        self.vida = vida
+        self.x = float(waypoints[0][0] - atraso)
+        self.y = float(waypoints[0][1])
         self.indice_alvo = 1
         self.ativo = True
+        self.chegou_ao_fim = False
+
+    def receber_dano(self, dano):
+        # Diminui a vida do slime quando ele e atingido.
+        self.vida -= dano
+        if self.vida <= 0:
+            self.ativo = False
 
     def atualizar(self, dt):
         # Se nao houver mais pontos, o inimigo para de se mover.
         if not self.ativo or self.indice_alvo >= len(self.waypoints):
+            if self.indice_alvo >= len(self.waypoints):
+                self.chegou_ao_fim = True
             self.ativo = False
             return
 
@@ -47,5 +62,70 @@ class Inimigo:
         self.y += direcao_y * passo
 
     def desenhar(self, tela):
-        # Desenha o inimigo como um circulo cinza.
-        pygame.draw.circle(tela, CINZA, (int(self.x), int(self.y)), self.raio)
+        # Desenha o slime como uma bolinha verde.
+        pygame.draw.circle(tela, VERDE_SLIME, (int(self.x), int(self.y)), self.raio)
+        pygame.draw.circle(tela, VERDE_ESCURO, (int(self.x), int(self.y)), self.raio, 2)
+        self.desenhar_barra_vida(tela)
+
+    def desenhar_barra_vida(self, tela):
+        # Mostra a vida do slime acima da cabeca.
+        largura = 36
+        altura = 6
+        x_barra = int(self.x - largura / 2)
+        y_barra = int(self.y - self.raio - 12)
+        proporcao = max(self.vida, 0) / self.vida_maxima
+
+        pygame.draw.rect(tela, VERMELHO, (x_barra, y_barra, largura, altura))
+        pygame.draw.rect(tela, VERDE_ESCURO, (x_barra, y_barra, largura * proporcao, altura))
+        pygame.draw.rect(tela, PRETO, (x_barra, y_barra, largura, altura), 1)
+
+
+class Personagem:
+    # Representa uma unidade colocada pelo jogador: guerreiro ou arqueiro.
+    def __init__(self, tipo, posicao):
+        self.tipo = tipo
+        self.x, self.y = posicao
+        self.dados = TIPOS_PERSONAGENS[tipo]
+        self.cooldown = 0
+
+    def atualizar(self, inimigos, dt):
+        # Reduz o tempo de espera entre ataques e tenta atacar um alvo.
+        if self.cooldown > 0:
+            self.cooldown -= dt
+
+        alvo = self.encontrar_alvo(inimigos)
+        if alvo and self.cooldown <= 0:
+            alvo.receber_dano(self.dados["dano"])
+            self.cooldown = self.dados["tempo_ataque"]
+
+    def encontrar_alvo(self, inimigos):
+        # O guerreiro ataca apenas inimigos na sua frente; o arqueiro ataca em area circular.
+        for inimigo in inimigos:
+            if not inimigo.ativo:
+                continue
+
+            distancia = math.hypot(inimigo.x - self.x, inimigo.y - self.y)
+            if self.tipo == "arqueiro" and distancia <= self.dados["alcance"]:
+                return inimigo
+
+            esta_na_frente = inimigo.x >= self.x and abs(inimigo.y - self.y) <= 45
+            if self.tipo == "guerreiro" and esta_na_frente and distancia <= self.dados["alcance"]:
+                return inimigo
+
+        return None
+
+    def desenhar(self, tela, fonte):
+        # Desenha visualmente o personagem e o seu alcance.
+        cor = LARANJA if self.tipo == "guerreiro" else ROXO
+        pygame.draw.circle(tela, cor, (int(self.x), int(self.y)), 18)
+        pygame.draw.circle(tela, PRETO, (int(self.x), int(self.y)), 18, 2)
+
+        if self.tipo == "arqueiro":
+            pygame.draw.circle(tela, PRETO, (int(self.x), int(self.y)), self.dados["alcance"], 1)
+        else:
+            area_frente = pygame.Rect(self.x, self.y - 45, self.dados["alcance"], 90)
+            pygame.draw.rect(tela, PRETO, area_frente, 1)
+
+        letra = "G" if self.tipo == "guerreiro" else "A"
+        texto = fonte.render(letra, True, PRETO)
+        tela.blit(texto, texto.get_rect(center=(self.x, self.y)))
