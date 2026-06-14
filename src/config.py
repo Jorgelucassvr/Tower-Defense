@@ -50,19 +50,21 @@ WAYPOINTS = [
     (1200, 395),
 ]
 
-# Regras principais do prototipo.
-MOEDAS_INICIAIS = 150
+# Regras principais 
+MOEDAS_INICIAIS = 120
 VIDAS_INICIAIS = 3
-MOEDAS_POR_ELIMINACAO = 10
+DANO_SLIME_BASE = 1
+DANO_SUPREMO_BASE = 3
+MOEDAS_POR_ELIMINACAO = 15
 PONTOS_POR_SLIME = 100
 PONTOS_INIMIGO_SUPREMO = 500
 TOTAL_ONDAS = 5
 INIMIGOS_POR_ONDA = 5
 INTERVALO_SPAWN = 1.0
-INTERVALO_ENTRE_ONDAS = 2.0
-VIDA_SLIME_BASE = 45
-VIDA_EXTRA_POR_ONDA = 18
-VIDA_INIMIGO_SUPREMO = 220
+INTERVALO_ENTRE_ONDAS = 5.0
+VIDA_SLIME_BASE = 50
+VIDA_EXTRA_POR_ONDA = 40
+VIDA_INIMIGO_SUPREMO = 750
 LIMITE_GUERREIROS = 3
 LIMITE_ARQUEIROS = 2
 
@@ -72,15 +74,29 @@ TIPOS_PERSONAGENS = {
         "nome": "Guerreiro",
         "custo": 50,
         "alcance": 130,
-        "dano": 18,
-        "tempo_ataque": 0.75,
+        "dano": 25,
+        "tempo_ataque": 1.0,
+    },
+    "guerreirolv2": {
+        "nome": "Guerreiro supremo",
+        "custo": 75,
+        "alcance": 130,
+        "dano": 35,
+        "tempo_ataque": 1.0,
     },
     "arqueiro": {
         "nome": "Arqueiro",
         "custo": 100,
         "alcance": 210,
-        "dano": 12,
-        "tempo_ataque": 0.45,
+        "dano": 10,
+        "tempo_ataque": 0.65,
+    },
+    "arqueirolv2": {
+        "nome": "Arqueiro supremo",
+        "custo": 150,
+        "alcance": 210,
+        "dano": 20,
+        "tempo_ataque": 0.5,
     },
 }
 
@@ -94,5 +110,7 @@ BOTOES_PERSONAGENS = {
 }
 
 # Botoes mostrados quando a partida acaba.
+BOTAO_PLAY = pygame.Rect(500, 330, 200, 65)
+CAMPO_NOME = pygame.Rect(430, 280, 340, 42)
 BOTAO_REINICIAR = pygame.Rect(430, 185, 160, 50)
 BOTAO_SAIR = pygame.Rect(610, 185, 160, 50)

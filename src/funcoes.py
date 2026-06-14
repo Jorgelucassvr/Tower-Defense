@@ -3,7 +3,9 @@ import pygame
 from src.config import (
     ALTURA_TELA,
     AMARELO,
+    CAMPO_NOME,
     AZUL,
+    BOTAO_PLAY,
     BOTAO_REINICIAR,
     BOTAO_SAIR,
     BRANCO,
@@ -11,6 +13,7 @@ from src.config import (
     CAMINHO_ESTRADA,
     CINZA,
     LARANJA,
+    LARGURA_TELA,
     MARROM,
     PAINEL_PERSONAGENS,
     PRETO,
@@ -121,10 +124,37 @@ def desenhar_interface(tela, fonte, estado):
     desenhar_ranking(tela, fonte, estado["ranking"])
 
 
-def desenhar_ranking(tela, fonte, ranking):
+def desenhar_menu_inicial(tela, fonte, fonte_grande, estado):
+    # Tela inicial: mostra o titulo, o botao Play e o ranking.
+    desenhar_mapa(tela)
+
+    painel = pygame.Rect(0, 0, 600, 310)
+    painel.center = (LARGURA_TELA // 2, 260)
+    pygame.draw.rect(tela, CINZA, painel, border_radius=16)
+    pygame.draw.rect(tela, PRETO, painel, width=3, border_radius=16)
+
+    titulo = fonte_grande.render("Tower Defenser", True, PRETO)
+    tela.blit(titulo, titulo.get_rect(center=(LARGURA_TELA // 2, 170)))
+
+    subtitulo = fonte.render("Digite seu nome e proteja a estrada.", True, PRETO)
+    tela.blit(subtitulo, subtitulo.get_rect(center=(LARGURA_TELA // 2, 230)))
+
+    pygame.draw.rect(tela, BRANCO, CAMPO_NOME, border_radius=10)
+    pygame.draw.rect(tela, PRETO, CAMPO_NOME, width=2, border_radius=10)
+    nome = estado["nome_jogador"] if estado["nome_jogador"] else "Jogador"
+    texto_nome = fonte.render(nome, True, PRETO)
+    tela.blit(texto_nome, (CAMPO_NOME.x + 14, CAMPO_NOME.y + 10))
+
+    pygame.draw.rect(tela, AMARELO, BOTAO_PLAY, border_radius=12)
+    pygame.draw.rect(tela, PRETO, BOTAO_PLAY, width=3, border_radius=12)
+    texto_play = fonte_grande.render("PLAY", True, PRETO)
+    tela.blit(texto_play, texto_play.get_rect(center=BOTAO_PLAY.center))
+
+    desenhar_ranking(tela, fonte, estado["ranking"])
+
+
+def desenhar_ranking(tela, fonte, ranking, x=920, y=185):
     # Mostra as melhores pontuacoes salvas no arquivo data/ranking.txt.
-    x = 920
-    y = 185
     tela.blit(fonte.render("Ranking", True, PRETO), (x, y))
 
     if not ranking:
@@ -133,8 +163,9 @@ def desenhar_ranking(tela, fonte, ranking):
 
     for indice, entrada in enumerate(ranking[:5], start=1):
         resultado = abreviar_resultado(entrada["resultado"])
+        nome = entrada.get("nome", "Jogador")[:8]
         texto = fonte.render(
-            f"{indice}. {entrada['pontos']} pts {resultado} O{entrada['ondas']}",
+            f"{indice}. {nome} {entrada['pontos']} pts {resultado} O{entrada['ondas']}",
             True,
             PRETO,
         )

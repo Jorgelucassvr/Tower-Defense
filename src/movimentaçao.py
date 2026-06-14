@@ -104,6 +104,50 @@ class Personagem:
         self.dados = TIPOS_PERSONAGENS[tipo]
         self.cooldown = 0
 
+    def proximo_tipo(self):
+        # Define para qual versao o personagem evolui.
+        evolucoes = {
+            "guerreiro": "guerreirolv2",
+            "arqueiro": "arqueirolv2",
+        }
+        return evolucoes.get(self.tipo)
+
+    def pode_evoluir(self):
+        # Retorna True apenas para personagens que ainda nao evoluiram.
+        return self.proximo_tipo() is not None
+
+    def custo_evolucao(self):
+        # Usa o custo do tipo evoluido como preco da melhoria.
+        proximo = self.proximo_tipo()
+        if proximo is None:
+            return 0
+        return TIPOS_PERSONAGENS[proximo]["custo"]
+
+    def evoluir(self):
+        # Troca os dados do personagem pela versao mais forte.
+        proximo = self.proximo_tipo()
+        if proximo is None:
+            return False
+
+        self.tipo = proximo
+        self.dados = TIPOS_PERSONAGENS[self.tipo]
+        return True
+
+    def mouse_sobre_personagem(self, posicao_mouse):
+        # Verifica se o mouse esta sobre o circulo do personagem.
+        distancia = math.hypot(posicao_mouse[0] - self.x, posicao_mouse[1] - self.y)
+        return distancia <= 22
+
+    def botao_evolucao(self):
+        # Botao pequeno que aparece acima do personagem quando o mouse passa por ele.
+        return pygame.Rect(int(self.x - 45), int(self.y - 55), 90, 28)
+
+    def mostrar_botao_evolucao(self, posicao_mouse):
+        # Mantem o botao visivel ao passar pelo personagem ou pelo proprio botao.
+        if not self.pode_evoluir():
+            return False
+        return self.mouse_sobre_personagem(posicao_mouse) or self.botao_evolucao().collidepoint(posicao_mouse)
+
     def atualizar(self, inimigos, dt):
         # Controla o intervalo entre ataques da unidade.
         if self.cooldown > 0:
@@ -121,27 +165,48 @@ class Personagem:
                 continue
 
             distancia = math.hypot(inimigo.x - self.x, inimigo.y - self.y)
-            if self.tipo == "arqueiro" and distancia <= self.dados["alcance"]:
+            if self.tipo.startswith("arqueiro") and distancia <= self.dados["alcance"]:
                 return inimigo
 
             esta_na_frente = inimigo.x >= self.x and abs(inimigo.y - self.y) <= 45
-            if self.tipo == "guerreiro" and esta_na_frente and distancia <= self.dados["alcance"]:
+            if self.tipo.startswith("guerreiro") and esta_na_frente and distancia <= self.dados["alcance"]:
                 return inimigo
 
         return None
 
     def desenhar(self, tela, fonte):
         # Desenho visual do personagem e o seu alcance.
-        cor = LARANJA if self.tipo == "guerreiro" else ROXO
+        cor = LARANJA if self.tipo.startswith("guerreiro") else ROXO
         pygame.draw.circle(tela, cor, (int(self.x), int(self.y)), 18)
         pygame.draw.circle(tela, PRETO, (int(self.x), int(self.y)), 18, 2)
 
-        if self.tipo == "arqueiro":
+        if self.tipo.startswith("arqueiro"):
             pygame.draw.circle(tela, PRETO, (int(self.x), int(self.y)), self.dados["alcance"], 1)
         else:
             area_frente = pygame.Rect(self.x, self.y - 45, self.dados["alcance"], 90)
             pygame.draw.rect(tela, PRETO, area_frente, 1)
 
-        letra = "G" if self.tipo == "guerreiro" else "A"
+        letra = self.letra()
         texto = fonte.render(letra, True, PRETO)
         tela.blit(texto, texto.get_rect(center=(self.x, self.y)))
+
+    def desenhar_botao_evolucao(self, tela, fonte):
+        # Desenha o botao de evolucao quando ele estiver ativo.
+        if not self.pode_evoluir():
+            return
+
+        botao = self.botao_evolucao()
+        pygame.draw.rect(tela, (255, 245, 180), botao, border_radius=8)
+        pygame.draw.rect(tela, PRETO, botao, width=2, border_radius=8)
+        texto = fonte.render(f"Up ${self.custo_evolucao()}", True, PRETO)
+        tela.blit(texto, texto.get_rect(center=botao.center))
+
+    def letra(self):
+        # Mostra uma letra curta dentro do personagem.
+        if self.tipo == "guerreiro":
+            return "G"
+        if self.tipo == "guerreirolv2":
+            return "G2"
+        if self.tipo == "arqueiro":
+            return "A"
+        return "A2"

@@ -42,18 +42,27 @@ def carregar_ranking(caminho_arquivo):
 
 
 def converter_linha_ranking(linha):
-    # Aceita tanto o formato novo quanto arquivos antigos com apenas numeros.
+    # Aceita o formato com nome e tambem arquivos antigos.
     partes = linha.strip().split(";")
     if len(partes) == 1 and partes[0].isdigit():
-        return {"pontos": int(partes[0]), "resultado": "Partida", "ondas": 0}
+        return {"nome": "Jogador", "pontos": int(partes[0]), "resultado": "Partida", "ondas": 0}
 
-    if len(partes) != 3 or not partes[0].isdigit() or not partes[2].isdigit():
+    if len(partes) == 3 and partes[0].isdigit() and partes[2].isdigit():
+        return {
+            "nome": "Jogador",
+            "pontos": int(partes[0]),
+            "resultado": partes[1],
+            "ondas": int(partes[2]),
+        }
+
+    if len(partes) != 4 or not partes[1].isdigit() or not partes[3].isdigit():
         return None
 
     return {
-        "pontos": int(partes[0]),
-        "resultado": partes[1],
-        "ondas": int(partes[2]),
+        "nome": partes[0] or "Jogador",
+        "pontos": int(partes[1]),
+        "resultado": partes[2],
+        "ondas": int(partes[3]),
     }
 
 
@@ -62,20 +71,33 @@ def ordenar_ranking(ranking):
     return sorted(ranking, key=lambda entrada: entrada["pontos"], reverse=True)
 
 
-def salvar_pontuacao_ranking(caminho_arquivo, pontuacao, resultado, ondas, limite=5):
+def salvar_pontuacao_ranking(caminho_arquivo, nome, pontuacao, resultado, ondas, limite=5):
     # Adiciona a pontuacao final ao ranking e salva somente o top 5.
     criar_pasta_se_preciso(caminho_arquivo)
     ranking = carregar_ranking(caminho_arquivo)
-    ranking.append({"pontos": pontuacao, "resultado": resultado, "ondas": ondas})
+    ranking.append({
+        "nome": limpar_nome_jogador(nome),
+        "pontos": pontuacao,
+        "resultado": resultado,
+        "ondas": ondas,
+    })
     ranking = ordenar_ranking(ranking)[:limite]
 
     with open(caminho_arquivo, "w", encoding="utf-8") as arquivo:
         for entrada in ranking:
             arquivo.write(
-                f"{entrada['pontos']};{entrada['resultado']};{entrada['ondas']}\n"
+                f"{entrada['nome']};{entrada['pontos']};{entrada['resultado']};{entrada['ondas']}\n"
             )
 
     return ranking
+
+
+def limpar_nome_jogador(nome):
+    # Evita nomes vazios e remove o separador usado no arquivo do ranking.
+    nome_limpo = nome.strip().replace(";", "")[:12]
+    if nome_limpo == "":
+        return "Jogador"
+    return nome_limpo
 
 
 def criar_pasta_se_preciso(caminho_arquivo):
