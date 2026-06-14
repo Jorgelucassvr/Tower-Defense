@@ -3,6 +3,7 @@ import pygame
 from src.config import (
     ALTURA_TELA,
     AMARELO,
+    BARBARO_COR,
     CAMPO_NOME,
     AZUL,
     BOTAO_PLAY,
@@ -14,6 +15,9 @@ from src.config import (
     CINZA,
     LARANJA,
     LARGURA_TELA,
+    LIMITE_ARQUEIROS,
+    LIMITE_BARBARO,
+    LIMITE_GUERREIROS,
     MARROM,
     PAINEL_PERSONAGENS,
     PRETO,
@@ -92,7 +96,8 @@ def desenhar_interface(tela, fonte, estado):
     pygame.draw.rect(tela, CINZA, PAINEL_PERSONAGENS, border_radius=12)
     pygame.draw.rect(tela, PRETO, PAINEL_PERSONAGENS, width=2, border_radius=12)
     tela.blit(fonte.render("Personagens", True, PRETO), (920, 35))
-    tela.blit(fonte.render("Max: 3 G / 2 A", True, PRETO), (920, 60))
+    limites = f"Max: {LIMITE_GUERREIROS} G / {LIMITE_ARQUEIROS} A / {LIMITE_BARBARO} B"
+    tela.blit(fonte.render(limites, True, PRETO), (920, 60))
 
     # Desenha os icones/botoes para escolher guerreiro ou arqueiro.
     for tipo, botao in BOTOES_PERSONAGENS.items():
@@ -104,8 +109,8 @@ def desenhar_interface(tela, fonte, estado):
         pygame.draw.rect(tela, cor_fundo, botao, border_radius=10)
         pygame.draw.rect(tela, PRETO, botao, width=2, border_radius=10)
 
-        letra = "G" if tipo == "guerreiro" else "A"
-        cor_icone = LARANJA if tipo == "guerreiro" else ROXO
+        letra = letra_icone_personagem(tipo)
+        cor_icone = cor_icone_personagem(tipo)
         pygame.draw.circle(tela, cor_icone, (centro[0], centro[1] - 8), 15)
         pygame.draw.circle(tela, PRETO, (centro[0], centro[1] - 8), 15, 2)
         texto_letra = fonte.render(letra, True, PRETO)
@@ -122,6 +127,24 @@ def desenhar_interface(tela, fonte, estado):
         tela.blit(fonte.render(estado["mensagem"], True, PRETO), (30, ALTURA_TELA - 35))
 
     desenhar_ranking(tela, fonte, estado["ranking"])
+
+
+def letra_icone_personagem(tipo):
+    # Letra curta usada no botao da loja.
+    if tipo == "guerreiro":
+        return "G"
+    elif tipo == "arqueiro":
+        return "A"
+    return "B"
+
+
+def cor_icone_personagem(tipo):
+    # Cor do icone da loja de acordo com a classe.
+    if tipo == "guerreiro":
+        return LARANJA
+    if tipo == "arqueiro":
+        return ROXO
+    return BARBARO_COR
 
 
 def desenhar_menu_inicial(tela, fonte, fonte_grande, estado):
@@ -188,12 +211,21 @@ def desenhar_fim_de_jogo(tela, fonte_grande, estado):
 
     texto = "VITORIA!" if estado["status"] == "vitoria" else "DERROTA!"
     texto_renderizado = fonte_grande.render(texto, True, PRETO)
+    fonte_info = pygame.font.SysFont(None, 28)
     fundo = pygame.Rect(0, 0, 460, 230)
     fundo.center = (600, 155)
 
     pygame.draw.rect(tela, CINZA, fundo, border_radius=14)
     pygame.draw.rect(tela, PRETO, fundo, width=3, border_radius=14)
     tela.blit(texto_renderizado, texto_renderizado.get_rect(center=(600, 95)))
+
+    resumo = f"Pontos: {estado['pontos']}  Moedas finais: {estado['moedas']}"
+    texto_resumo = fonte_info.render(resumo, True, PRETO)
+    tela.blit(texto_resumo, texto_resumo.get_rect(center=(600, 130)))
+
+    mensagem = estado.get("mensagem", "")[:58]
+    texto_mensagem = fonte_info.render(mensagem, True, PRETO)
+    tela.blit(texto_mensagem, texto_mensagem.get_rect(center=(600, 155)))
 
     # Depois do fim, o jogo fica aberto para reiniciar ou sair.
     desenhar_botao_fim(tela, fonte_grande, BOTAO_REINICIAR, "Reiniciar")

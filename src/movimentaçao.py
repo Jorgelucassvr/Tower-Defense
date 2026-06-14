@@ -3,6 +3,7 @@ import math
 import pygame
 
 from src.config import (
+    BARBARO_COR,
     LARANJA,
     MOEDAS_POR_ELIMINACAO,
     PONTOS_INIMIGO_SUPREMO,
@@ -10,6 +11,7 @@ from src.config import (
     PRETO,
     ROXO,
     TIPOS_PERSONAGENS,
+    VIDA_SLIME_BASE,
     VERDE_ESCURO,
     VERDE_SLIME,
     VERDE_SUPREMO,
@@ -25,14 +27,15 @@ class Inimigo:
         atraso=0,
         velocidade=85,
         raio=15,
-        vida=45,
+        vida=None,
         tipo="slime",
     ):
         self.waypoints = waypoints
         self.velocidade = velocidade
         self.raio = raio
-        self.vida_maxima = vida
-        self.vida = vida
+        vida_inicial = VIDA_SLIME_BASE if vida is None else vida
+        self.vida_maxima = vida_inicial
+        self.vida = vida_inicial
         self.tipo = tipo
         self.cor = VERDE_SUPREMO if tipo == "supremo" else VERDE_SLIME
         self.moedas = MOEDAS_POR_ELIMINACAO
@@ -109,6 +112,7 @@ class Personagem:
         evolucoes = {
             "guerreiro": "guerreirolv2",
             "arqueiro": "arqueirolv2",
+            "barbaro": "barbarolv2",
         }
         return evolucoes.get(self.tipo)
 
@@ -153,19 +157,41 @@ class Personagem:
         if self.cooldown > 0:
             self.cooldown -= dt
 
+        if self.tipo.startswith("barbaro"):
+            self.atacar_em_area(inimigos)
+            return
+
         alvo = self.encontrar_alvo(inimigos)
         if alvo and self.cooldown <= 0:
             alvo.receber_dano(self.dados["dano"])
             self.cooldown = self.dados["tempo_ataque"]
 
-    def encontrar_alvo(self, inimigos):
-        # O arqueiro ataca em circulo; o guerreiro ataca apenas a frente.
+    def atacar_em_area(self, inimigos):
+        # O barbaro causa dano em todos os inimigos dentro do seu alcance.
+        if self.cooldown > 0:
+            return
+
+        acertou_algum = False
         for inimigo in inimigos:
             if not inimigo.ativo:
                 continue
 
             distancia = math.hypot(inimigo.x - self.x, inimigo.y - self.y)
-            if self.tipo.startswith("arqueiro") and distancia <= self.dados["alcance"]:
+            if distancia <= self.dados["alcance"]:
+                inimigo.receber_dano(self.dados["dano"])
+                acertou_algum = True
+
+        if acertou_algum:
+            self.cooldown = self.dados["tempo_ataque"]
+
+    def encontrar_alvo(self, inimigos):
+        # Arqueiro e barbaro atacam em circulo; guerreiro ataca apenas a frente.
+        for inimigo in inimigos:
+            if not inimigo.ativo:
+                continue
+
+            distancia = math.hypot(inimigo.x - self.x, inimigo.y - self.y)
+            if self.tipo.startswith(("arqueiro", "barbaro")) and distancia <= self.dados["alcance"]:
                 return inimigo
 
             esta_na_frente = inimigo.x >= self.x and abs(inimigo.y - self.y) <= 45
@@ -176,11 +202,11 @@ class Personagem:
 
     def desenhar(self, tela, fonte):
         # Desenho visual do personagem e o seu alcance.
-        cor = LARANJA if self.tipo.startswith("guerreiro") else ROXO
+        cor = self.cor()
         pygame.draw.circle(tela, cor, (int(self.x), int(self.y)), 18)
         pygame.draw.circle(tela, PRETO, (int(self.x), int(self.y)), 18, 2)
 
-        if self.tipo.startswith("arqueiro"):
+        if self.tipo.startswith(("arqueiro", "barbaro")):
             pygame.draw.circle(tela, PRETO, (int(self.x), int(self.y)), self.dados["alcance"], 1)
         else:
             area_frente = pygame.Rect(self.x, self.y - 45, self.dados["alcance"], 90)
@@ -209,4 +235,16 @@ class Personagem:
             return "G2"
         if self.tipo == "arqueiro":
             return "A"
-        return "A2"
+        if self.tipo == "arqueirolv2":
+            return "A2"
+        if self.tipo == "barbaro":
+            return "B"
+        return "B2"
+
+    def cor(self):
+        # Define uma cor diferente para cada classe de aliado.
+        if self.tipo.startswith("guerreiro"):
+            return LARANJA
+        if self.tipo.startswith("arqueiro"):
+            return ROXO
+        return BARBARO_COR

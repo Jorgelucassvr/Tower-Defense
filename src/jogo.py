@@ -1,5 +1,6 @@
 import pygame
 
+
 from src.config import (
     BOTAO_PLAY,
     BOTAO_REINICIAR,
@@ -9,6 +10,7 @@ from src.config import (
     CAMINHO_RECORDE,
     DANO_SLIME_BASE,
     DANO_SUPREMO_BASE,
+    DISTANCIA_MINIMA_PERSONAGENS,
     FPS,
     INIMIGOS_POR_ONDA,
     INTERVALO_ENTRE_ONDAS,
@@ -16,8 +18,11 @@ from src.config import (
     ALTURA_TELA,
     LARGURA_TELA,
     LIMITE_ARQUEIROS,
+    LIMITE_BARBARO,
     LIMITE_GUERREIROS,
     MOEDAS_INICIAIS,
+    MOEDAS_POR_VIDA_PERDIDA,
+    ONDAS_COM_SUPREMO,
     TIPOS_PERSONAGENS,
     TITULO_JOGO,
     TOTAL_ONDAS,
@@ -166,17 +171,34 @@ def limite_do_personagem(tipo):
     # Define o limite de cada personagem.
     if tipo == "guerreiro":
         return LIMITE_GUERREIROS
+    if tipo == "barbaro":
+        return LIMITE_BARBARO
     return LIMITE_ARQUEIROS
 
 
+def posicao_ocupada_por_personagem(posicao, personagens):
+    # Impede que dois personagens fiquem ocupando o mesmo espaco visual.
+    for personagem in personagens:
+        distancia_x = posicao[0] - personagem.x
+        distancia_y = posicao[1] - personagem.y
+        distancia = (distancia_x ** 2 + distancia_y ** 2) ** 0.5
+        if distancia < DISTANCIA_MINIMA_PERSONAGENS:
+            return True
+    return False
+
+
 def colocar_personagem(posicao, estado, personagens):
-    # Tenta colocar o guerreiro ou arqueiro no mapa.
+    # Tenta colocar o personagem selecionado no mapa.
     tipo = estado["selecionado"]
     custo = TIPOS_PERSONAGENS[tipo]["custo"]
     limite = limite_do_personagem(tipo)
 
     if posicao_no_caminho(posicao) or posicao_na_interface(posicao):
         estado["mensagem"] = "Coloque o personagem fora da estrada e da loja."
+        return
+
+    if posicao_ocupada_por_personagem(posicao, personagens):
+        estado["mensagem"] = "Espaco ocupado por outro personagem."
         return
 
     if contar_personagens(personagens, tipo) >= limite:
@@ -190,6 +212,7 @@ def colocar_personagem(posicao, estado, personagens):
     personagens.append(Personagem(tipo, posicao))
     estado["moedas"] -= custo
     estado["mensagem"] = f"{TIPOS_PERSONAGENS[tipo]['nome']} colocado."
+
 
 
 def tentar_evoluir_personagem(posicao, estado, personagens):
@@ -224,26 +247,44 @@ def criar_slime_da_onda(onda):
     return Inimigo(WAYPOINTS, vida=vida_slime_da_onda(onda))
 
 
-def criar_inimigo_supremo():
-    # Cria o ultimo inimigo do jogo: maior, mais lento e com muita vida.
+def total_inimigos_da_onda(onda):
+    # A cada onda adicionamos 1 slime em relacao a quantidade base.
+    return INIMIGOS_POR_ONDA + (onda - 1)
+
+
+def onda_tem_supremo(onda):
+    # Define em quais ondas aparece um chefe supremo.
+    return onda in ONDAS_COM_SUPREMO
+
+
+def vida_supremo_da_onda(onda=None):
+    # O primeiro boss tem metade da vida do boss final.
+    primeira_onda_com_boss = ONDAS_COM_SUPREMO[0]
+    if onda == primeira_onda_com_boss:
+        return VIDA_INIMIGO_SUPREMO // 2
+    return VIDA_INIMIGO_SUPREMO
+
+
+def criar_inimigo_supremo(onda=None):
+    # Cria o inimigo supremo com vida baseada na onda.
     return Inimigo(
         WAYPOINTS,
         velocidade=60,
         raio=25,
-        vida=VIDA_INIMIGO_SUPREMO,
+        vida=vida_supremo_da_onda(onda),
         tipo="supremo",
     )
 
 
 def onda_atual_terminou(estado, inimigos):
-    # Confere se todos os inimigos previstos da onda atual ja sairam da tela.
-    normais_prontos = estado["spawnados_onda"] >= INIMIGOS_POR_ONDA
-    chefe_pronto = estado["onda_atual"] < TOTAL_ONDAS or estado["supremo_spawnado"]
+    # todos os inimigos previstos da onda atual ja sairam da tela.
+    normais_prontos = estado["spawnados_onda"] >= total_inimigos_da_onda(estado["onda_atual"])
+    chefe_pronto = not onda_tem_supremo(estado["onda_atual"]) or estado["supremo_spawnado"]
     return normais_prontos and chefe_pronto and len(inimigos) == 0
 
 
 def gerar_inimigos(estado, inimigos, dt):
-    # Gera slimes da onda atual e, na ultima onda, cria o inimigo supremo.
+    # Gera slimes da onda atual e cria o boss nas ondas especiais.
     if estado["onda_atual"] > TOTAL_ONDAS:
         return
 
@@ -251,20 +292,21 @@ def gerar_inimigos(estado, inimigos, dt):
     if estado["tempo_spawn"] < INTERVALO_SPAWN:
         return
 
-    if estado["spawnados_onda"] < INIMIGOS_POR_ONDA:
+    if estado["spawnados_onda"] < total_inimigos_da_onda(estado["onda_atual"]):
         inimigos.append(criar_slime_da_onda(estado["onda_atual"]))
         estado["spawnados_onda"] += 1
         estado["tempo_spawn"] = 0
         return
 
-    if estado["onda_atual"] == TOTAL_ONDAS and not estado["supremo_spawnado"]:
-        inimigos.append(criar_inimigo_supremo())
+    if onda_tem_supremo(estado["onda_atual"]) and not estado["supremo_spawnado"]:
+        inimigos.append(criar_inimigo_supremo(estado["onda_atual"]))
         estado["supremo_spawnado"] = True
         estado["tempo_spawn"] = 0
-        estado["mensagem"] = "Inimigo supremo apareceu!"
+        estado["mensagem"] = f"Boss supremo da onda {estado['onda_atual']} apareceu!"
 
 
 def avancar_onda_se_preciso(estado, inimigos, dt):
+    #ONDAS
     # Depois que uma onda termina, espera um pouco e inicia a proxima.
     if not onda_atual_terminou(estado, inimigos):
         estado["tempo_entre_ondas"] = 0
@@ -282,6 +324,7 @@ def avancar_onda_se_preciso(estado, inimigos, dt):
         estado["spawnados_onda"] = 0
         estado["tempo_spawn"] = 0
         estado["tempo_entre_ondas"] = 0
+        estado["supremo_spawnado"] = False
         estado["mensagem"] = f"Onda {estado['onda_atual']} iniciada."
 
 
@@ -293,9 +336,14 @@ def atualizar_inimigos(estado, inimigos, dt):
         if not inimigo.ativo:
             if inimigo.chegou_ao_fim:
                 dano_base = dano_inimigo_na_base(inimigo)
+                moedas_bonus = moedas_por_vida_perdida(dano_base)
                 estado["vidas"] -= dano_base
+                estado["moedas"] += moedas_bonus
                 nome = "O supremo" if inimigo.tipo == "supremo" else "Um slime"
-                estado["mensagem"] = f"{nome} chegou ao final e tirou {dano_base} vida(s)!"
+                estado["mensagem"] = (
+                    f"{nome} chegou ao final, tirou {dano_base} vida(s) "
+                    f"e gerou +{moedas_bonus} moedas."
+                )
             elif inimigo.vida <= 0:
                 estado["moedas"] += inimigo.moedas
                 estado["pontos"] += inimigo.pontos
@@ -303,6 +351,11 @@ def atualizar_inimigos(estado, inimigos, dt):
                 estado["mensagem"] = f"+{inimigo.moedas} moedas e +{inimigo.pontos} pontos."
 
             inimigos.remove(inimigo)
+
+
+def moedas_por_vida_perdida(vidas_perdidas):
+    # Recompensa o jogador com moedas quando uma vida e perdida.
+    return vidas_perdidas * MOEDAS_POR_VIDA_PERDIDA
 
 
 def dano_inimigo_na_base(inimigo):
@@ -325,7 +378,11 @@ def verificar_fim_de_jogo(estado, inimigos):
 
     if jogador_perdeu(estado["vidas"]):
         estado["status"] = "derrota"
-        estado["mensagem"] = "Fim de jogo: voce perdeu todas as vidas."
+        mensagem_anterior = estado.get("mensagem", "")
+        if "moedas" in mensagem_anterior:
+            estado["mensagem"] = f"Fim de jogo! {mensagem_anterior}"
+        else:
+            estado["mensagem"] = "Fim de jogo: voce perdeu todas as vidas."
 
     onda_acabou = estado["onda_atual"] == TOTAL_ONDAS and onda_atual_terminou(estado, inimigos)
     if onda_acabou and estado["vidas"] > 0:
